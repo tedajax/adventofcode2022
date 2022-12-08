@@ -32,6 +32,8 @@ size_t read_file_to_buffer(const char *filename, char **buf_ptr)
 	rewind(fp);
 
 	char *buffer = (char *)malloc(len + 1);
+	memset(buffer, 0, len + 1);
+
 	char *curr = buffer;
 	while (!feof(fp))
 	{
@@ -39,9 +41,11 @@ size_t read_file_to_buffer(const char *filename, char **buf_ptr)
 		curr++;
 	}
 
+	ptrdiff_t read_bytes = curr - buffer;
+
 	buffer[len] = 0;
 
 	*buf_ptr = buffer;
 
-	return len + 1;
+	return (size_t)read_bytes;
 }

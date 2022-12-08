@@ -91,7 +91,7 @@ int main(int argc, char* argv[])
 
 
 	std::string current = "/";
-	Info* currentDir = &root;
+	Info* current_dir = &root;
 
 	std::string line;
 	while (std::getline(file, line)) {
@@ -103,17 +103,17 @@ int main(int argc, char* argv[])
 				std::string dir = command.substr(3);
 				if (dir.starts_with(".."))
 				{
-					currentDir = currentDir->parent;
+					current_dir = current_dir->parent;
 					current = parent_path(current);
 				}
 				else if (dir.starts_with("/"))
 				{
 					current = "/";
-					currentDir = &root;
+					current_dir = &root;
 				}
 				else
 				{
-					currentDir = &currentDir->items.at(dir);
+					current_dir = &current_dir->items.at(dir);
 					current = append_path(current, dir);
 				}
 				std::cout << current << std::endl;
@@ -124,14 +124,14 @@ int main(int argc, char* argv[])
 			if (line.starts_with("dir"))
 			{
 				std::string dir_name = line.substr(4);
-				Info::CreateDirectory(dir_name, currentDir);
+				Info::CreateDirectory(dir_name, current_dir);
 			}
 			else
 			{
 				std::size_t index = line.find(' ');
 				long size = std::strtol(line.c_str(), nullptr, 10);
 				std::string file_name = line.substr(index + 1);
-				Info::CreateFile(file_name, size, currentDir);
+				Info::CreateFile(file_name, size, current_dir);
 			}
 		}
 	}
@@ -155,17 +155,10 @@ int main(int argc, char* argv[])
 		stack.pop();
 		if (curr.is_dir)
 		{
-			std::stack<Info> substack;
 			for (auto& [_, item] : curr.items)
 			{
-				substack.push(item);
+				stack.push(item);
 			}
-
-			while (!substack.empty())
-			{
-				stack.push(substack.top());
-				substack.pop();
-			} 
 
 			long currSize = curr.GetSize();
 			if (currSize <= 100000) {
@@ -177,7 +170,6 @@ int main(int argc, char* argv[])
 				smallestRemovable = currSize;
 			}
 		}
-
 	}
 
 	std::cout << "Part 1: " << sum << std::endl;
