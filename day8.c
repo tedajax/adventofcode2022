@@ -1,4 +1,29 @@
-#include "util.h"
+#include <ctype.h>
+#include <math.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+char *read_file(const char *filename, size_t *bytes_read)
+{
+	FILE *fp = fopen(filename, "r");
+
+	*bytes_read = 0;
+
+	if (!fp)
+		return NULL;
+
+	fseek(fp, 0, SEEK_END);
+	long len = ftell(fp);
+	rewind(fp);
+
+	char *buffer = (char *)calloc(len + 1, 1);
+	*bytes_read = fread(buffer, 1, (size_t)len, fp);
+	return buffer;
+}
 
 const int DELTAS[] = {
 	-1, 0,
@@ -71,8 +96,8 @@ int tree_score(char *data, int width, int height, int x, int y)
 
 int main(int argc, char *argv[])
 {
-	char *text;
-	ptrdiff_t len = read_file_to_buffer("day8_input.txt", &text);
+	size_t len;
+	char *text = read_file("day8_input.txt", &len);
 
 	const char *delim = "\r\n";
 
@@ -126,7 +151,7 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	printf("Visible Trees: %d\n%c %c\n", sum, data[99], data[100]);
+	printf("Visible Trees: %d\n", sum);
 	printf("Highest Scenic Score: (%d, %d) -> %d\n", best_x, best_y, best_score);
 
 	free(data);
