@@ -16,6 +16,10 @@ struct point
 	int x, y;
 };
 
+#define BODY_LEN 100
+
+typedef struct point snake[BODY_LEN];
+
 struct entry
 {
 	uint64_t key;
@@ -84,13 +88,13 @@ int sgn(int v)
 		return 1;
 }
 
-void move_body_helper(struct point body[10], struct point delta, int offset)
+void move_body_helper(snake body, struct point delta, int offset)
 {
 	struct point *b0 = NULL, *b1 = NULL, *b2 = NULL;
 	if (offset > 0)
 		b0 = &body[offset - 1];
 	b1 = &body[offset];
-	if (offset < 9)
+	if (offset < BODY_LEN - 1)
 		b2 = &body[offset + 1];
 
 	if (b0 && delta.x != 0 && delta.y != 0)
@@ -121,7 +125,7 @@ void move_body_helper(struct point body[10], struct point delta, int offset)
 	}
 }
 
-void move_body(struct point body[10], struct point delta)
+void move_body(snake body, struct point delta)
 {
 	move_body_helper(body, delta, 0);
 }
@@ -136,7 +140,7 @@ int main(int argc, char *argv[])
 	size_t len;
 	char *text = read_file("day9_input.txt", &len);
 
-	struct point body[10] = {0};
+	snake body = {0};
 	struct point head = {0}, tail = {0};
 	struct entry *visited1 = NULL;
 	struct entry *visited2 = NULL;
@@ -171,7 +175,7 @@ int main(int argc, char *argv[])
 
 			{
 				move_body(body, delta);
-				uint64_t key = hash_point(&body[9]);
+				uint64_t key = hash_point(&body[BODY_LEN - 1]);
 				if (hmgeti(visited2, key) < 0)
 				{
 					hmput(visited2, key, tail);

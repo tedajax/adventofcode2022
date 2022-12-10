@@ -49,3 +49,56 @@ size_t read_file_to_buffer(const char *filename, char **buf_ptr)
 
 	return (size_t)read_bytes;
 }
+
+char *read_file(const char *filename, size_t *bytes_read)
+{
+	FILE *fp = fopen(filename, "r");
+
+	if (!fp)
+		return NULL;
+
+	fseek(fp, 0, SEEK_END);
+	long size = ftell(fp);
+	rewind(fp);
+	char *buffer = (char *)calloc(size + 1, 1);
+	size_t read = fread(buffer, 1, (size_t)size, fp);
+
+	if (bytes_read)
+		*bytes_read = read;
+
+	return buffer;
+}
+
+char **read_file_lines(const char *filename)
+{
+	char **result = NULL;
+	arrsetcap(result, 256);
+
+	size_t len;
+	char *text = read_file(filename, &len);
+	const char *delim = "\n";
+	char *line = strtok(text, delim);
+	while (line && *line > 0)
+	{
+		size_t line_len = strlen(line);
+		char *copy = (char *)calloc(line_len + 1, 1);
+		memcpy(copy, line, line_len);
+
+		arrput(result, copy);
+
+		line = strtok(NULL, delim);
+	}
+	free(text);
+
+	return result;
+}
+
+void free_file_lines(char **lines)
+{
+	ptrdiff_t len = arrlen(lines);
+	for (ptrdiff_t i = 0; i < len; ++i)
+	{
+		free(lines[i]);
+	}
+	arrfree(lines);
+}
