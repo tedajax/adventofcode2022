@@ -109,23 +109,6 @@ can_move(struct point from, struct point to)
     return ((dx == 1 && dy == 0) || (dx == 0 && dy == 1)) && (z2 - z1 <= 1);
 }
 
-int
-dist(struct point a, struct point b)
-{
-    return abs(b.x - a.x) + abs(b.y - a.y);
-}
-
-int
-contains(struct point *p, int x, int y)
-{
-    for (int i = 0; i < arrlen(p); ++i) {
-        if (p[i].x == x && p[i].y == y) {
-            return 1;
-        }
-    }
-    return 0;
-}
-
 struct node
 {
     struct node *parent;
@@ -141,7 +124,7 @@ bool in_closed_list[map_width * map_height] = {0};
 struct point start, end;
 
 struct node *
-make_node(struct node *parent, struct point p, int g, int h)
+make_node(struct node *parent, struct point p, int g)
 {
     if (node_pool == NULL) arrsetcap(node_pool, 16384);
 
@@ -200,6 +183,10 @@ add_to_closed(struct node *node)
 struct node *
 process_node(struct node *node)
 {
+    if (!node) {
+        return NULL;
+    }
+
     if (node->p.x == end.x && node->p.y == end.y) return node;
 
     add_to_closed(node);
@@ -218,34 +205,34 @@ process_node(struct node *node)
         test.y += dir.y;
 
         if (valid_point(test) && can_move(node->p, test)) {
-            int d = dist(test, end);
-            struct node *new_node = make_node(node, test, node->g + 1, dist(test, end));
-
-            add_to_open(new_node);
+            int id = get_id(test.x, test.y);
+            if (!in_open_list[id]) {
+                struct node *new_node = make_node(node, test, node->g + 1);
+                add_to_open(new_node);
+            }
         }
     }
+
+    int adjids[4] = {
+        get_id(node->p.x - 1, node->p.y),
+        get_id(node->p.x + 1, node->p.y),
+        get_id(node->p.x, node->p.y - 1),
+        get_id(node->p.x, node->p.y + 1),
+    };
+    int min_g = INT_MAX;
+    struct node *min_node = NULL;
 
     // find adjacent nodes in the open list
     for (int i = 0, len = arrlen(open_list); i < len; ++i) {
-        struct node *adj = open_list[i];
-        int id = get_id(adj->p.x, adj->p.y);
-        if (id == get_id(node->p.x - 1, node->p.y) || id == get_id(node->p.x + 1, node->p.y)
-            || id == get_id(node->p.x, node->p.y - 1) || id == get_id(node->p.x, node->p.y + 1))
-        {
-            if (adj->g < node->g) {
-                adj->parent = node;
-                adj->g = node->g + 1;
-            }
-            break;
-        }
-    }
-
-    if (arrlen(open_list) == 0) return NULL;
-
-    int min_g = 9999999;
-    struct node *min_node = NULL;
-    for (int i = 0, len = arrlen(open_list); i < len; ++i) {
         struct node *open = open_list[i];
+        int id = get_id(open->p.x, open->p.y);
+        for (int j = 0; j < 4; ++j) {
+            if (id == adjids[j] && open->g < node->g) {
+                open->parent = node;
+                open->g = node->g + 1;
+                break;
+            }
+        }
         if (open->g < min_g) {
             min_g = open->g;
             min_node = open;
@@ -264,17 +251,13 @@ get_path_len()
     memset(in_open_list, 0, sizeof(in_open_list));
     memset(in_closed_list, 0, sizeof(in_closed_list));
 
-    struct node *start_node = make_node(NULL, start, 0, 0);
+    struct node *start_node = make_node(NULL, start, 0);
     add_to_open(start_node);
     struct node *final_node = process_node(start_node);
-
-    struct point *path = NULL;
-    arrsetcap(path, 128);
 
     struct node *slider = final_node;
     int len = 0;
     while (slider) {
-        arrput(path, slider->p);
         slider = slider->parent;
         len++;
     }
@@ -284,6 +267,9 @@ get_path_len()
 int
 main(void)
 {
+    struct point starts[map_width * map_height] = {0};
+    int starts_count = 0;
+
     const char *c = map;
     while (*c) {
         int i = c - map;
@@ -293,6 +279,8 @@ main(void)
         } else if (*c == 'E') {
             end.x = i % map_width;
             end.y = i / map_width;
+        } else if (*c == 'a') {
+            starts[starts_count++] = (struct point){i % map_width, i / map_width};
         }
         c++;
     }
@@ -305,19 +293,15 @@ main(void)
 
     // part 2
     {
-        int min_len = 9999999;
+        int min_len = INT_MAX;
         struct point min_len_start;
-        for (int y = 0; y < map_height; ++y) {
-            for (int x = 0; x < map_width; ++x) {
-                start = (struct point){x, y};
-                if (get_z(start) == 'a') {
-                    int len = get_path_len();
+        for (int i = 0; i < starts_count; ++i) {
+            start = starts[i];
+            int len = get_path_len();
 
-                    if (len > 0 && len < min_len) {
-                        min_len = len;
-                        min_len_start = start;
-                    }
-                }
+            if (len > 0 && len < min_len) {
+                min_len = len;
+                min_len_start = start;
             }
         }
 
@@ -327,6 +311,8 @@ main(void)
             min_len_start.y,
             min_len);
     }
+
+    printf("%d\n", arrlen(node_pool));
 
     return 0;
 }
