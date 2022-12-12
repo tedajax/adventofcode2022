@@ -312,7 +312,5 @@ main(void)
             min_len);
     }
 
-    printf("%d\n", arrlen(node_pool));
-
     return 0;
 }
