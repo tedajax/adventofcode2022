@@ -201,7 +201,7 @@ struct node *process_node(struct node *node)
 	if (node->p.x == end.x && node->p.y == end.y)
 		return node;
 
-	print_lists();
+	// print_lists();
 
 	add_to_closed(node);
 
@@ -395,12 +395,12 @@ int main(void)
 		struct point *path = get_path();
 
 		printf("Best path so far is %d steps long.\n", arrlen(path) - 1);
+		// print_map(path);
 
 		arrfree(path);
 	}
 
 	// part 2
-	if (false)
 	{
 		int min_len = 9999999;
 		struct point min_len_start;
