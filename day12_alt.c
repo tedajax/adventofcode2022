@@ -121,78 +121,82 @@ struct node
 	int g, h;
 };
 
-struct node *node_pool = NULL;
-struct node **open_list = NULL;
-struct node **closed_list = NULL;
-struct point start, end;
+int get_key(int x, int y)
+{
+	if (valid_point((struct point){x, y}))
+	{
+		return ((x & 0xFF) << 8) | (y & 0xFF);
+	}
+	return -1;
+}
 
-void print_map_w_lists(struct node **open_list, struct node **closed_list);
+int get_node_key(struct node *node)
+{
+	return get_key(node->p.x, node->p.y);
+}
+
+struct entry
+{
+	int key;
+	struct node *value;
+};
+
+struct node node_pool[16384] = {0};
+int node_count = 0;
+struct entry *open_list = NULL;
+struct entry *closed_list = NULL;
+struct point start, end;
 
 struct node *make_node(struct node *parent, struct point p, int g, int h)
 {
-	if (node_pool == NULL)
-		arrsetcap(node_pool, 16384);
+	node_pool[node_count++] = (struct node){
+		.parent = parent,
+		.p = p,
+		.g = g,
+		.h = h,
+	};
 
-	arrput(node_pool, ((struct node){
-						  .parent = parent,
-						  .p = p,
-						  .g = g,
-						  .h = h,
-					  }));
-
-	struct node *new_node = &node_pool[arrlen(node_pool) - 1];
-	// printf("new node: [%d,%d]\n", p.x, p.y);
+	struct node *new_node = &node_pool[node_count - 1];
 
 	return new_node;
 }
 
 int node_f(struct node *node) { return node->g + node->h; }
 
-int indexof_node(struct node **list, const struct node *node)
-{
-	for (int i = 0; i < arrlen(list); ++i)
-	{
-		if (list[i]->p.x == node->p.x && list[i]->p.y == node->p.y)
-		{
-			return i;
-		}
-	}
-
-	return -1;
-}
-
 void add_to_open(struct node *node)
 {
-	if (indexof_node(open_list, node) >= 0 || indexof_node(closed_list, node) >= 0)
+	int key = get_node_key(node);
+	if (hmgeti(open_list, key) >= 0 || hmgeti(closed_list, key) >= 0)
 	{
 		return;
 	}
-	arrput(open_list, node);
+	hmput(open_list, key, node);
 }
 
 void add_to_closed(struct node *node)
 {
-	if (indexof_node(closed_list, node) >= 0)
+	int key = get_node_key(node);
+	if (hmgeti(closed_list, key) >= 0)
 	{
 		return;
 	}
 
-	int i = indexof_node(open_list, node);
-	if (i >= 0)
-	{
-		arrdel(open_list, i);
-	}
-	arrput(closed_list, node);
+	hmdel(open_list, key);
+	hmput(closed_list, key, node);
 }
 
-void print_lists()
+void print_lists(void)
 {
 	printf("open: ");
-	for (int i = 0, len = arrlen(open_list); i < len; ++i)
-		printf("[%d,%d] ", open_list[i]->p.x, open_list[i]->p.y);
+	for (int i = 0, len = hmlen(open_list); i < len; ++i)
+	{
+		printf("[%d,%d] ", open_list[i].value->p.x, open_list[i].value->p.y);
+	}
 	printf("\nclosed: ");
-	for (int i = 0, len = arrlen(closed_list); i < len; ++i)
-		printf("[%d,%d] ", closed_list[i]->p.x, closed_list[i]->p.y);
+	for (int i = 0, len = hmlen(closed_list); i < len; ++i)
+	{
+		printf("[%d,%d] ", closed_list[i].value->p.x, closed_list[i].value->p.y);
+	}
 	printf("\n");
 }
 
@@ -221,28 +225,32 @@ struct node *process_node(struct node *node)
 
 		if (valid_point(test) && can_move(node->p, test))
 		{
-			int d = dist(test, end);
 			struct node *new_node = make_node(node, test, node->g + 1, dist(test, end));
-
 			add_to_open(new_node);
 		}
 	}
 
 	// find adjacent nodes in the open list
-	struct node **adjacent = NULL;
-	arrsetcap(adjacent, 4);
-	for (int i = 0; i < arrlen(open_list); ++i)
+	struct node *adjacent[4] = {0};
+	int adj_count = 0;
+
+	int adj_keys[4] = {
+		get_key(node->p.x + 1, node->p.y),
+		get_key(node->p.x - 1, node->p.y),
+		get_key(node->p.x, node->p.y + 1),
+		get_key(node->p.x, node->p.y - 1),
+	};
+
+	for (int i = 0; i < 4; ++i)
 	{
-		struct node *adj = open_list[i];
-		int dx = abs(adj->p.x - node->p.x);
-		int dy = abs(adj->p.y - node->p.y);
-		if ((dx == 0 && dy == 1) || (dx == 1 && dy == 0))
+		int index = hmgeti(open_list, adj_keys[i]);
+		if (index >= 0)
 		{
-			arrput(adjacent, adj);
+			adjacent[adj_count++] = open_list[index].value;
 		}
 	}
 
-	for (int i = 0; i < arrlen(adjacent); ++i)
+	for (int i = 0; i < adj_count; ++i)
 	{
 		struct node *adj = adjacent[i];
 		if (adj->g < node->g)
@@ -252,14 +260,14 @@ struct node *process_node(struct node *node)
 		}
 	}
 
-	if (arrlen(open_list) == 0)
+	if (hmlen(open_list) == 0)
 		return NULL;
 
 	int min_f = 9999999;
 	struct node *min_f_node = NULL;
-	for (int i = 0, len = arrlen(open_list); i < len; ++i)
+	for (int i = 0, len = hmlen(open_list); i < len; ++i)
 	{
-		struct node *open = open_list[i];
+		struct node *open = open_list[i].value;
 		if (node_f(open) < min_f)
 		{
 			min_f = node_f(open);
@@ -273,16 +281,16 @@ struct node *process_node(struct node *node)
 
 struct point *get_path()
 {
-	arrsetlen(open_list, 0);
-	arrsetlen(closed_list, 0);
-	arrsetlen(node_pool, 0);
+	hmfree(open_list);
+	hmfree(closed_list);
+	node_count = 0;
 
 	struct node *start_node = make_node(NULL, start, 0, 0);
 	add_to_open(start_node);
 	struct node *final_node = process_node(start_node);
 
 	struct point *path = NULL;
-	arrsetcap(path, 128);
+	arrsetcap(path, 512);
 
 	struct node *slider = final_node;
 	while (slider)
@@ -298,49 +306,6 @@ struct point *get_path()
 	}
 
 	return path;
-}
-
-int list_contains(struct node **list, int x, int y)
-{
-	for (int i = 0; i < arrlen(list); ++i)
-	{
-		if (list[i]->p.x == x && list[i]->p.y == y)
-		{
-			return 1;
-		}
-	}
-	return 0;
-}
-
-void print_map_w_lists(struct node **open_list, struct node **closed_list)
-{
-	for (int y = 0; y < map_height; ++y)
-	{
-		for (int x = 0; x < map_width; ++x)
-		{
-			if (x == start.x && y == start.y)
-			{
-				printf("S");
-			}
-			else if (x == end.x && y == end.y)
-			{
-				printf("E");
-			}
-			else if (open_list && list_contains(open_list, x, y))
-			{
-				printf(".");
-			}
-			else if (closed_list && list_contains(closed_list, x, y))
-			{
-				printf("#");
-			}
-			else
-			{
-				printf("%c", map[x + y * map_width]);
-			}
-		}
-		printf("\n");
-	}
 }
 
 void print_map(struct point *path)
@@ -363,7 +328,7 @@ void print_map(struct point *path)
 			}
 			else
 			{
-				printf("%c", map[x + y * map_width]);
+				printf("%c", get_z((struct point){x, y}));
 			}
 		}
 		printf("\n");
@@ -395,7 +360,6 @@ int main(void)
 		struct point *path = get_path();
 
 		printf("Best path so far is %d steps long.\n", arrlen(path) - 1);
-
 		arrfree(path);
 	}
 
@@ -404,11 +368,11 @@ int main(void)
 	{
 		int min_len = 9999999;
 		struct point min_len_start;
-		for (int y = 0; y < map_height; ++y)
+		// for (int y = 0; y < map_height; ++y)
 		{
-			for (int x = 0; x < map_width; ++x)
+			// for (int x = 0; x < map_width; ++x)
 			{
-				start = (struct point){x, y};
+				start = (struct point){0, 30};
 				if (get_z(start) == 'a')
 				{
 					struct point *path = get_path();
@@ -421,11 +385,16 @@ int main(void)
 							min_len = len;
 							min_len_start = start;
 						}
+						print_map(path);
+
 						arrfree(path);
 					}
 				}
 			}
 		}
+
+		// start = (struct point){0, 30};
+		// struct point *path = get_path();
 
 		printf("Min start path starts at [%d,%d] and is %d steps long\n", min_len_start.x, min_len_start.y, min_len);
 	}
