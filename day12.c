@@ -3,432 +3,330 @@
 #if 1
 enum
 {
-	map_width = 93,
-	map_height = 41,
+    map_width = 93,
+    map_height = 41,
 };
 
-const char *map = "abacccaaaacccccccccccaaaaaacccccaaaaaaccccaaacccccccccccccccccccccccccccccccccccccccccccaaaaa"
-				  "abaaccaaaacccccccccccaaaaaaccccccaaaaaaaaaaaaaccccccccccccccccccccccccccccccccccccccccccaaaaa"
-				  "abaaccaaaacccccccccccaaaaacccccaaaaaaaaaaaaaaaccccccccccccccccccccccccccccccccccccccccccaaaaa"
-				  "abccccccccccccccccccccaaaaacccaaaaaaaaaaaaaaaacccccccccccccccccccccccccccaaaccccccccccccaaaaa"
-				  "abccccccccccccccccccccaacaacccaaaaaaaaccaaaaaccccccccccccccccccccccccccccaaaccccccccccccaccaa"
-				  "abcccccccccccccaacccaaaccccccaaaaaaaaaccaaaaaccccccccccccccccccccccccccccccacccccccccccccccca"
-				  "abcccccccccccaaaaaaccaaaccacccccaaaaaaacccccccccccccccccccccccccciiiicccccccddddddccccccccccc"
-				  "abcccccccccccaaaaaaccaaaaaaaccccaaaaaacccccaacccccccaaaccccccccciiiiiiiicccdddddddddacaaccccc"
-				  "abccccccccccccaaaaaaaaaaaaacccccaaaaaaacaaaacccccccaaaacccccccchhiiiiiiiiicddddddddddaaaccccc"
-				  "abcccccccccccaaaaaaaaaaaaaacccccccaaacccaaaaaacccccaaaaccccccchhhipppppiiiijjjjjjjddddaaccccc"
-				  "abcccccccccccaaaaaaaaaaaaaaccccccccccccccaaaaaccccccaaaccccccchhhpppppppiijjjjjjjjjddeeaccccc"
-				  "abcccccccccccccccccaaaaaaaacccccccccccccaaaaaccccccccccccccccchhppppppppppjjqqqjjjjjeeeaacccc"
-				  "abccccccccccccccccccaaaaaaaacccccccccccccccaacccccccccccccccchhhpppuuuupppqqqqqqqjjjeeeaacccc"
-				  "abcccccccccccccccccccaacccacccccccccccccccccccccccccccccccccchhhopuuuuuuppqqqqqqqjjjeeecccccc"
-				  "abacccccccccccccaaacaaaccccccccccccccccccccccccccccaaccccccchhhhoouuuuuuuqvvvvvqqqjkeeecccccc"
-				  "abaccccccccccccaaaaaacccccaaccccccccccccccccccccccaaaccccccchhhooouuuxxxuvvvvvvqqqkkeeecccccc"
-				  "abaccccccccccccaaaaaacccaaaaaaccccccccccccccccccaaaaaaaaccchhhhooouuxxxxuvyyyvvqqqkkeeecccccc"
-				  "abcccccccccccccaaaaacccaaaaaaaccccccccccccccccccaaaaaaaaccjjhooooouuxxxxyyyyyvvqqqkkeeecccccc"
-				  "abccccccccccccccaaaaaacaaaaaaaccccccccaaaccccccccaaaaaaccjjjooootuuuxxxxyyyyyvvqqkkkeeecccccc"
-				  "abccccccccccccccaaaaaaaaaaaaacccccccccaaaacccccccaaaaaacjjjooootttuxxxxxyyyyvvrrrkkkeeecccccc"
-				  "SbccccccccccccccccccaaaaaaaaacccccccccaaaacccccccaaaaaacjjjoootttxxxEzzzzyyvvvrrrkkkfffcccccc"
-				  "abcccccccccccaaacccccaaaaaaacaaaccccccaaaccccccccaaccaacjjjoootttxxxxxyyyyyyvvvrrkkkfffcccccc"
-				  "abcccccccccaaaaaacccaaaaaacccaaacacccaacccccccccccccccccjjjoootttxxxxyxyyyyyywvvrrkkkfffccccc"
-				  "abcccccccccaaaaaacccaaaaaaaaaaaaaaaccaaacaaacccccaacccccjjjnnnttttxxxxyyyyyyywwwrrkkkfffccccc"
-				  "abcaacacccccaaaaacccaaacaaaaaaaaaaaccaaaaaaacccccaacaaacjjjnnnntttttxxyywwwwwwwwrrrlkfffccccc"
-				  "abcaaaaccccaaaaacccccccccaacaaaaaaccccaaaaaacccccaaaaacccjjjnnnnnttttwwywwwwwwwrrrrllfffccccc"
-				  "abaaaaaccccaaaaaccccccaaaaaccaaaaacaaaaaaaaccccaaaaaaccccjjjjinnnntttwwwwwsssrrrrrllllffccccc"
-				  "abaaaaaaccccccccccccccaaaaacaaaaaacaaaaaaaaacccaaaaaaacccciiiiinnnntswwwwssssrrrrrlllfffccccc"
-				  "abacaaaaccccccccccccccaaaaaacaaccccaaaaaaaaaaccccaaaaaaccccciiiinnnssswwsssssllllllllfffccccc"
-				  "abccaaccccccccccccccccaaaaaaccccccccccaaacaaaccccaaccaacccccciiiinnsssssssmmllllllllfffaacccc"
-				  "abccccccccccccccccccccaaaaaaccccccccccaaaccccccccaaccccccccccciiinnmsssssmmmmlllllgggffaacccc"
-				  "abcccccccccccccccaccccccaaacccccccccccaaccccccccccccccccccccccciiimmmsssmmmmmgggggggggaaacccc"
-				  "abcccccccccaaaaaaaaccccccccccccccccccccccccccccaaaaaccccccccccciiimmmmmmmmmgggggggggaaacccccc"
-				  "abccccccccccaaaaaaccccccccccccccccccaacccccccccaaaaacccccccccccciiimmmmmmmhhggggcaaaaaaaccccc"
-				  "abccccccccccaaaaaacccccccccccccccccaacccccccccaaaaaacccccccccccciihhmmmmhhhhgccccccccaacccccc"
-				  "abccccaacaaaaaaaaaaccccccccccccccccaaaccccccccaaaaaaccccccccccccchhhhhhhhhhhaaccccccccccccccc"
-				  "abccccaaaaaaaaaaaaaaccccccccccaaccaaaaccccccccaaaaaacccaaacccccccchhhhhhhhaaaaccccccccccccccc"
-				  "abcccaaaaaaaaaaaaaaaccccccccaaaaaacaaaacacaccccaaaccccaaaacccccccccchhhhccccaaccccccccccaaaca"
-				  "abcccaaaaaacacaaacccccccccccaaaaaaaaaaaaaaacccccccccccaaaacccccccccccaaaccccccccccccccccaaaaa"
-				  "abcccccaaaacccaaaccccccccccaaaaaaaaaaaaaaaaccccccccccccaaacccccccccccaaacccccccccccccccccaaaa"
-				  "abcccccaacccccaacccccccccccaaaaaaaaaaaaaccccccccccccccccccccccccccccccccccccccccccccccccaaaaa";
+const char *map =
+    "abacccaaaacccccccccccaaaaaacccccaaaaaaccccaaacccccccccccccccccccccccccccccccccccccccccccaaaaa"
+    "abaaccaaaacccccccccccaaaaaaccccccaaaaaaaaaaaaaccccccccccccccccccccccccccccccccccccccccccaaaaa"
+    "abaaccaaaacccccccccccaaaaacccccaaaaaaaaaaaaaaaccccccccccccccccccccccccccccccccccccccccccaaaaa"
+    "abccccccccccccccccccccaaaaacccaaaaaaaaaaaaaaaacccccccccccccccccccccccccccaaaccccccccccccaaaaa"
+    "abccccccccccccccccccccaacaacccaaaaaaaaccaaaaaccccccccccccccccccccccccccccaaaccccccccccccaccaa"
+    "abcccccccccccccaacccaaaccccccaaaaaaaaaccaaaaaccccccccccccccccccccccccccccccacccccccccccccccca"
+    "abcccccccccccaaaaaaccaaaccacccccaaaaaaacccccccccccccccccccccccccciiiicccccccddddddccccccccccc"
+    "abcccccccccccaaaaaaccaaaaaaaccccaaaaaacccccaacccccccaaaccccccccciiiiiiiicccdddddddddacaaccccc"
+    "abccccccccccccaaaaaaaaaaaaacccccaaaaaaacaaaacccccccaaaacccccccchhiiiiiiiiicddddddddddaaaccccc"
+    "abcccccccccccaaaaaaaaaaaaaacccccccaaacccaaaaaacccccaaaaccccccchhhipppppiiiijjjjjjjddddaaccccc"
+    "abcccccccccccaaaaaaaaaaaaaaccccccccccccccaaaaaccccccaaaccccccchhhpppppppiijjjjjjjjjddeeaccccc"
+    "abcccccccccccccccccaaaaaaaacccccccccccccaaaaaccccccccccccccccchhppppppppppjjqqqjjjjjeeeaacccc"
+    "abccccccccccccccccccaaaaaaaacccccccccccccccaacccccccccccccccchhhpppuuuupppqqqqqqqjjjeeeaacccc"
+    "abcccccccccccccccccccaacccacccccccccccccccccccccccccccccccccchhhopuuuuuuppqqqqqqqjjjeeecccccc"
+    "abacccccccccccccaaacaaaccccccccccccccccccccccccccccaaccccccchhhhoouuuuuuuqvvvvvqqqjkeeecccccc"
+    "abaccccccccccccaaaaaacccccaaccccccccccccccccccccccaaaccccccchhhooouuuxxxuvvvvvvqqqkkeeecccccc"
+    "abaccccccccccccaaaaaacccaaaaaaccccccccccccccccccaaaaaaaaccchhhhooouuxxxxuvyyyvvqqqkkeeecccccc"
+    "abcccccccccccccaaaaacccaaaaaaaccccccccccccccccccaaaaaaaaccjjhooooouuxxxxyyyyyvvqqqkkeeecccccc"
+    "abccccccccccccccaaaaaacaaaaaaaccccccccaaaccccccccaaaaaaccjjjooootuuuxxxxyyyyyvvqqkkkeeecccccc"
+    "abccccccccccccccaaaaaaaaaaaaacccccccccaaaacccccccaaaaaacjjjooootttuxxxxxyyyyvvrrrkkkeeecccccc"
+    "SbccccccccccccccccccaaaaaaaaacccccccccaaaacccccccaaaaaacjjjoootttxxxEzzzzyyvvvrrrkkkfffcccccc"
+    "abcccccccccccaaacccccaaaaaaacaaaccccccaaaccccccccaaccaacjjjoootttxxxxxyyyyyyvvvrrkkkfffcccccc"
+    "abcccccccccaaaaaacccaaaaaacccaaacacccaacccccccccccccccccjjjoootttxxxxyxyyyyyywvvrrkkkfffccccc"
+    "abcccccccccaaaaaacccaaaaaaaaaaaaaaaccaaacaaacccccaacccccjjjnnnttttxxxxyyyyyyywwwrrkkkfffccccc"
+    "abcaacacccccaaaaacccaaacaaaaaaaaaaaccaaaaaaacccccaacaaacjjjnnnntttttxxyywwwwwwwwrrrlkfffccccc"
+    "abcaaaaccccaaaaacccccccccaacaaaaaaccccaaaaaacccccaaaaacccjjjnnnnnttttwwywwwwwwwrrrrllfffccccc"
+    "abaaaaaccccaaaaaccccccaaaaaccaaaaacaaaaaaaaccccaaaaaaccccjjjjinnnntttwwwwwsssrrrrrllllffccccc"
+    "abaaaaaaccccccccccccccaaaaacaaaaaacaaaaaaaaacccaaaaaaacccciiiiinnnntswwwwssssrrrrrlllfffccccc"
+    "abacaaaaccccccccccccccaaaaaacaaccccaaaaaaaaaaccccaaaaaaccccciiiinnnssswwsssssllllllllfffccccc"
+    "abccaaccccccccccccccccaaaaaaccccccccccaaacaaaccccaaccaacccccciiiinnsssssssmmllllllllfffaacccc"
+    "abccccccccccccccccccccaaaaaaccccccccccaaaccccccccaaccccccccccciiinnmsssssmmmmlllllgggffaacccc"
+    "abcccccccccccccccaccccccaaacccccccccccaaccccccccccccccccccccccciiimmmsssmmmmmgggggggggaaacccc"
+    "abcccccccccaaaaaaaaccccccccccccccccccccccccccccaaaaaccccccccccciiimmmmmmmmmgggggggggaaacccccc"
+    "abccccccccccaaaaaaccccccccccccccccccaacccccccccaaaaacccccccccccciiimmmmmmmhhggggcaaaaaaaccccc"
+    "abccccccccccaaaaaacccccccccccccccccaacccccccccaaaaaacccccccccccciihhmmmmhhhhgccccccccaacccccc"
+    "abccccaacaaaaaaaaaaccccccccccccccccaaaccccccccaaaaaaccccccccccccchhhhhhhhhhhaaccccccccccccccc"
+    "abccccaaaaaaaaaaaaaaccccccccccaaccaaaaccccccccaaaaaacccaaacccccccchhhhhhhhaaaaccccccccccccccc"
+    "abcccaaaaaaaaaaaaaaaccccccccaaaaaacaaaacacaccccaaaccccaaaacccccccccchhhhccccaaccccccccccaaaca"
+    "abcccaaaaaacacaaacccccccccccaaaaaaaaaaaaaaacccccccccccaaaacccccccccccaaaccccccccccccccccaaaaa"
+    "abcccccaaaacccaaaccccccccccaaaaaaaaaaaaaaaaccccccccccccaaacccccccccccaaacccccccccccccccccaaaa"
+    "abcccccaacccccaacccccccccccaaaaaaaaaaaaaccccccccccccccccccccccccccccccccccccccccccccccccaaaaa";
 #else
 enum
 {
-	map_width = 8,
-	map_height = 5,
+    map_width = 8,
+    map_height = 5,
 };
 
 const char *map = "Sabqponm"
-				  "abcryxxl"
-				  "accszExk"
-				  "acctuvwj"
-				  "abdefghi";
+                  "abcryxxl"
+                  "accszExk"
+                  "acctuvwj"
+                  "abdefghi";
 #endif
 
 struct point
 {
-	int x, y;
+    int x, y;
 };
 
-int valid_point(struct point p)
+int
+valid_point(struct point p)
 {
-	return p.x >= 0 && p.y >= 0 && p.x < map_width && p.y < map_height;
+    return p.x >= 0 && p.y >= 0 && p.x < map_width && p.y < map_height;
 }
 
-char get_z(struct point p)
+int
+get_id(int x, int y)
 {
-	if (!valid_point(p))
-	{
-		return '\0';
-	}
-
-	char raw = map[p.x + p.y * map_width];
-	if (raw == 'S')
-		return 'a';
-	else if (raw == 'E')
-		return 'z';
-	return raw;
+    if (valid_point((struct point){x, y}))
+        return x + y * map_width;
+    else
+        return -1;
 }
 
-int can_move(struct point from, struct point to)
+char
+get_z(struct point p)
 {
-	int z1 = get_z(from);
-	int z2 = get_z(to);
+    if (!valid_point(p)) {
+        return '\0';
+    }
 
-	int dx = abs(to.x - from.x);
-	int dy = abs(to.y - from.y);
-	return ((dx == 1 && dy == 0) || (dx == 0 && dy == 1)) && (z2 - z1 <= 1);
+    char raw = map[p.x + p.y * map_width];
+    if (raw == 'S')
+        return 'a';
+    else if (raw == 'E')
+        return 'z';
+    return raw;
 }
 
-int dist(struct point a, struct point b)
+int
+can_move(struct point from, struct point to)
 {
-	return abs(b.x - a.x) + abs(b.y - a.y);
+    int z1 = get_z(from);
+    int z2 = get_z(to);
+
+    int dx = abs(to.x - from.x);
+    int dy = abs(to.y - from.y);
+    return ((dx == 1 && dy == 0) || (dx == 0 && dy == 1)) && (z2 - z1 <= 1);
 }
 
-int contains(struct point *p, int x, int y)
+int
+dist(struct point a, struct point b)
 {
-	for (int i = 0; i < arrlen(p); ++i)
-	{
-		if (p[i].x == x && p[i].y == y)
-		{
-			return 1;
-		}
-	}
-	return 0;
+    return abs(b.x - a.x) + abs(b.y - a.y);
+}
+
+int
+contains(struct point *p, int x, int y)
+{
+    for (int i = 0; i < arrlen(p); ++i) {
+        if (p[i].x == x && p[i].y == y) {
+            return 1;
+        }
+    }
+    return 0;
 }
 
 struct node
 {
-	struct node *parent;
-	struct point p;
-	int g, h;
+    struct node *parent;
+    struct point p;
+    int g;
 };
 
 struct node *node_pool = NULL;
 struct node **open_list = NULL;
 struct node **closed_list = NULL;
+bool in_open_list[map_width * map_height] = {0};
+bool in_closed_list[map_width * map_height] = {0};
 struct point start, end;
 
-void print_map_w_lists(struct node **open_list, struct node **closed_list);
-
-struct node *make_node(struct node *parent, struct point p, int g, int h)
+struct node *
+make_node(struct node *parent, struct point p, int g, int h)
 {
-	if (node_pool == NULL)
-		arrsetcap(node_pool, 16384);
+    if (node_pool == NULL) arrsetcap(node_pool, 16384);
 
-	arrput(node_pool, ((struct node){
-						  .parent = parent,
-						  .p = p,
-						  .g = g,
-						  .h = h,
-					  }));
+    arrput(
+        node_pool,
+        ((struct node){
+            .parent = parent,
+            .p = p,
+            .g = g,
+        }));
 
-	struct node *new_node = &node_pool[arrlen(node_pool) - 1];
-	// printf("new node: [%d,%d]\n", p.x, p.y);
+    struct node *new_node = &node_pool[arrlen(node_pool) - 1];
+    // printf("new node: [%d,%d]\n", p.x, p.y);
 
-	return new_node;
+    return new_node;
 }
 
-int node_f(struct node *node) { return node->g + node->h; }
-
-int indexof_node(struct node **list, const struct node *node)
+int
+indexof_node(struct node **list, const struct node *node)
 {
-	for (int i = 0; i < arrlen(list); ++i)
-	{
-		if (list[i]->p.x == node->p.x && list[i]->p.y == node->p.y)
-		{
-			return i;
-		}
-	}
+    for (int i = 0; i < arrlen(list); ++i) {
+        if (list[i]->p.x == node->p.x && list[i]->p.y == node->p.y) {
+            return i;
+        }
+    }
 
-	return -1;
+    return -1;
 }
 
-void add_to_open(struct node *node)
+void
+add_to_open(struct node *node)
 {
-	if (indexof_node(open_list, node) >= 0 || indexof_node(closed_list, node) >= 0)
-	{
-		return;
-	}
-	arrput(open_list, node);
+    int id = get_id(node->p.x, node->p.y);
+    if (in_open_list[id] || in_closed_list[id]) {
+        return;
+    }
+    in_open_list[id] = true;
+    arrput(open_list, node);
 }
 
-void add_to_closed(struct node *node)
+void
+add_to_closed(struct node *node)
 {
-	if (indexof_node(closed_list, node) >= 0)
-	{
-		return;
-	}
+    int id = get_id(node->p.x, node->p.y);
+    if (in_closed_list[id]) {
+        return;
+    }
 
-	int i = indexof_node(open_list, node);
-	if (i >= 0)
-	{
-		arrdel(open_list, i);
-	}
-	arrput(closed_list, node);
+    int i = indexof_node(open_list, node);
+    arrdel(open_list, i);
+    in_open_list[id] = false;
+    in_closed_list[id] = true;
+    arrput(closed_list, node);
 }
 
-void print_lists()
+struct node *
+process_node(struct node *node)
 {
-	printf("open: ");
-	for (int i = 0, len = arrlen(open_list); i < len; ++i)
-		printf("[%d,%d] ", open_list[i]->p.x, open_list[i]->p.y);
-	printf("\nclosed: ");
-	for (int i = 0, len = arrlen(closed_list); i < len; ++i)
-		printf("[%d,%d] ", closed_list[i]->p.x, closed_list[i]->p.y);
-	printf("\n");
+    if (node->p.x == end.x && node->p.y == end.y) return node;
+
+    add_to_closed(node);
+
+    const struct point dirs[4] = {
+        {1, 0},
+        {0, 1},
+        {-1, 0},
+        {0, -1},
+    };
+
+    for (int d = 0; d < 4; ++d) {
+        struct point dir = dirs[d];
+        struct point test = node->p;
+        test.x += dir.x;
+        test.y += dir.y;
+
+        if (valid_point(test) && can_move(node->p, test)) {
+            int d = dist(test, end);
+            struct node *new_node = make_node(node, test, node->g + 1, dist(test, end));
+
+            add_to_open(new_node);
+        }
+    }
+
+    // find adjacent nodes in the open list
+    for (int i = 0, len = arrlen(open_list); i < len; ++i) {
+        struct node *adj = open_list[i];
+        int id = get_id(adj->p.x, adj->p.y);
+        if (id == get_id(node->p.x - 1, node->p.y) || id == get_id(node->p.x + 1, node->p.y)
+            || id == get_id(node->p.x, node->p.y - 1) || id == get_id(node->p.x, node->p.y + 1))
+        {
+            if (adj->g < node->g) {
+                adj->parent = node;
+                adj->g = node->g + 1;
+            }
+            break;
+        }
+    }
+
+    if (arrlen(open_list) == 0) return NULL;
+
+    int min_g = 9999999;
+    struct node *min_node = NULL;
+    for (int i = 0, len = arrlen(open_list); i < len; ++i) {
+        struct node *open = open_list[i];
+        if (open->g < min_g) {
+            min_g = open->g;
+            min_node = open;
+        }
+    }
+
+    return process_node(min_node);
 }
 
-struct node *process_node(struct node *node)
+int
+get_path_len()
 {
-	if (node->p.x == end.x && node->p.y == end.y)
-		return node;
+    arrsetlen(open_list, 0);
+    arrsetlen(closed_list, 0);
+    arrsetlen(node_pool, 0);
+    memset(in_open_list, 0, sizeof(in_open_list));
+    memset(in_closed_list, 0, sizeof(in_closed_list));
 
-	// print_lists();
+    struct node *start_node = make_node(NULL, start, 0, 0);
+    add_to_open(start_node);
+    struct node *final_node = process_node(start_node);
 
-	add_to_closed(node);
+    struct point *path = NULL;
+    arrsetcap(path, 128);
 
-	const struct point dirs[4] = {
-		{1, 0},
-		{0, 1},
-		{-1, 0},
-		{0, -1},
-	};
-
-	for (int d = 0; d < 4; ++d)
-	{
-		struct point dir = dirs[d];
-		struct point test = node->p;
-		test.x += dir.x;
-		test.y += dir.y;
-
-		if (valid_point(test) && can_move(node->p, test))
-		{
-			int d = dist(test, end);
-			struct node *new_node = make_node(node, test, node->g + 1, dist(test, end));
-
-			add_to_open(new_node);
-		}
-	}
-
-	// find adjacent nodes in the open list
-	struct node **adjacent = NULL;
-	arrsetcap(adjacent, 4);
-	for (int i = 0; i < arrlen(open_list); ++i)
-	{
-		struct node *adj = open_list[i];
-		int dx = abs(adj->p.x - node->p.x);
-		int dy = abs(adj->p.y - node->p.y);
-		if ((dx == 0 && dy == 1) || (dx == 1 && dy == 0))
-		{
-			arrput(adjacent, adj);
-		}
-	}
-
-	for (int i = 0; i < arrlen(adjacent); ++i)
-	{
-		struct node *adj = adjacent[i];
-		if (adj->g < node->g)
-		{
-			adj->parent = node;
-			adj->g = node->g + 1;
-		}
-	}
-
-	if (arrlen(open_list) == 0)
-		return NULL;
-
-	int min_f = 9999999;
-	struct node *min_f_node = NULL;
-	for (int i = 0, len = arrlen(open_list); i < len; ++i)
-	{
-		struct node *open = open_list[i];
-		if (node_f(open) < min_f)
-		{
-			min_f = node_f(open);
-			min_f_node = open;
-		}
-	}
-
-	// print_map_w_lists(open_list, closed_list);
-	return process_node(min_f_node);
+    struct node *slider = final_node;
+    int len = 0;
+    while (slider) {
+        arrput(path, slider->p);
+        slider = slider->parent;
+        len++;
+    }
+    return len - 1;
 }
 
-struct point *get_path()
+int
+main(void)
 {
-	arrsetlen(open_list, 0);
-	arrsetlen(closed_list, 0);
-	arrsetlen(node_pool, 0);
+    const char *c = map;
+    while (*c) {
+        int i = c - map;
+        if (*c == 'S') {
+            start.x = i % map_width;
+            start.y = i / map_width;
+        } else if (*c == 'E') {
+            end.x = i % map_width;
+            end.y = i / map_width;
+        }
+        c++;
+    }
 
-	struct node *start_node = make_node(NULL, start, 0, 0);
-	add_to_open(start_node);
-	struct node *final_node = process_node(start_node);
+    // part 1
+    {
+        int len = get_path_len();
+        printf("Best path so far is %d steps long.\n", len);
+    }
 
-	struct point *path = NULL;
-	arrsetcap(path, 128);
+    // part 2
+    {
+        int min_len = 9999999;
+        struct point min_len_start;
+        for (int y = 0; y < map_height; ++y) {
+            for (int x = 0; x < map_width; ++x) {
+                start = (struct point){x, y};
+                if (get_z(start) == 'a') {
+                    int len = get_path_len();
 
-	struct node *slider = final_node;
-	while (slider)
-	{
-		arrput(path, slider->p);
-		slider = slider->parent;
-	}
+                    if (len > 0 && len < min_len) {
+                        min_len = len;
+                        min_len_start = start;
+                    }
+                }
+            }
+        }
 
-	if (arrlen(path) == 0)
-	{
-		arrfree(path);
-		return NULL;
-	}
+        printf(
+            "Min start path starts at [%d,%d] and is %d steps long\n",
+            min_len_start.x,
+            min_len_start.y,
+            min_len);
+    }
 
-	return path;
-}
-
-int list_contains(struct node **list, int x, int y)
-{
-	for (int i = 0; i < arrlen(list); ++i)
-	{
-		if (list[i]->p.x == x && list[i]->p.y == y)
-		{
-			return 1;
-		}
-	}
-	return 0;
-}
-
-void print_map_w_lists(struct node **open_list, struct node **closed_list)
-{
-	for (int y = 0; y < map_height; ++y)
-	{
-		for (int x = 0; x < map_width; ++x)
-		{
-			if (x == start.x && y == start.y)
-			{
-				printf("S");
-			}
-			else if (x == end.x && y == end.y)
-			{
-				printf("E");
-			}
-			else if (open_list && list_contains(open_list, x, y))
-			{
-				printf(".");
-			}
-			else if (closed_list && list_contains(closed_list, x, y))
-			{
-				printf("#");
-			}
-			else
-			{
-				printf("%c", map[x + y * map_width]);
-			}
-		}
-		printf("\n");
-	}
-}
-
-void print_map(struct point *path)
-{
-	for (int y = 0; y < map_height; ++y)
-	{
-		for (int x = 0; x < map_width; ++x)
-		{
-			if (x == start.x && y == start.y)
-			{
-				printf("S");
-			}
-			else if (x == end.x && y == end.y)
-			{
-				printf("E");
-			}
-			else if (path && contains(path, x, y))
-			{
-				printf(".");
-			}
-			else
-			{
-				printf("%c", map[x + y * map_width]);
-			}
-		}
-		printf("\n");
-	}
-}
-
-int main(void)
-{
-	const char *c = map;
-	while (*c)
-	{
-		int i = c - map;
-		if (*c == 'S')
-		{
-			start.x = i % map_width;
-			start.y = i / map_width;
-		}
-		else if (*c == 'E')
-		{
-			end.x = i % map_width;
-			end.y = i / map_width;
-		}
-		c++;
-	}
-
-	// part 1
-	{
-		// struct point *path = search(start, end);
-		struct point *path = get_path();
-
-		printf("Best path so far is %d steps long.\n", arrlen(path) - 1);
-		// print_map(path);
-
-		arrfree(path);
-	}
-
-	// part 2
-	{
-		int min_len = 9999999;
-		struct point min_len_start;
-		for (int y = 0; y < map_height; ++y)
-		{
-			for (int x = 0; x < map_width; ++x)
-			{
-				start = (struct point){x, y};
-				if (get_z(start) == 'a')
-				{
-					struct point *path = get_path();
-
-					if (path)
-					{
-						int len = arrlen(path) - 1;
-						if (len < min_len)
-						{
-							min_len = len;
-							min_len_start = start;
-						}
-						arrfree(path);
-					}
-				}
-			}
-		}
-
-		printf("Min start path starts at [%d,%d] and is %d steps long\n", min_len_start.x, min_len_start.y, min_len);
-	}
-
-	return 0;
+    return 0;
 }
