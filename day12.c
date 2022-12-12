@@ -1,4 +1,8 @@
-#include "util.h"
+#define STB_DS_IMPLEMENTATION
+#include "stb_ds.h"
+
+#include <stdio.h>
+#include <stdlib.h>
 
 #if 1
 enum
@@ -119,8 +123,8 @@ struct node
 struct node *node_pool = NULL;
 struct node **open_list = NULL;
 struct node **closed_list = NULL;
-bool in_open_list[map_width * map_height] = {0};
-bool in_closed_list[map_width * map_height] = {0};
+int in_open_list[map_width * map_height] = {0};
+int in_closed_list[map_width * map_height] = {0};
 struct point start, end;
 
 struct node *
@@ -161,7 +165,7 @@ add_to_open(struct node *node)
     if (in_open_list[id] || in_closed_list[id]) {
         return;
     }
-    in_open_list[id] = true;
+    in_open_list[id] = 1;
     arrput(open_list, node);
 }
 
@@ -175,8 +179,8 @@ add_to_closed(struct node *node)
 
     int i = indexof_node(open_list, node);
     arrdel(open_list, i);
-    in_open_list[id] = false;
-    in_closed_list[id] = true;
+    in_open_list[id] = 0;
+    in_closed_list[id] = 1;
     arrput(closed_list, node);
 }
 
