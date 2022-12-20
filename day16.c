@@ -8,7 +8,7 @@
 #define STB_DS_IMPLEMENTATION
 #include "stb_ds.h"
 
-#if 1
+#if 0
 const char* input_string = "Valve AA has flow rate=0; tunnels lead to valves DD, II, BB\n"
                            "Valve BB has flow rate=13; tunnels lead to valves CC, AA\n"
                            "Valve CC has flow rate=2; tunnels lead to valves DD, BB\n"
@@ -84,25 +84,42 @@ const char* input_string = "Valve XB has flow rate=0; tunnels lead to valves YV,
 
 #define TEST(m, b) (((m) & (1 << (b))) != 0)
 
-typedef char name[3];
+enum
+{
+    MAX_VALVES = 16,
+    NAME_LEN = 3,
+    MAX_ADJ_NAMES = 5,
+};
+
+typedef char name[NAME_LEN];
 
 struct valve_name
 {
-    char name[3];
+    char name[NAME_LEN];
 };
 
 struct valve_adj
 {
-    struct valve_name names[5];
+    struct valve_name names[MAX_ADJ_NAMES];
 };
 
 typedef uint64_t sim_state;
 
-// key = sim_state, value = total pressure released if run to completion
+struct sim_state_node
+{
+    sim_state state;
+    int total_pressure;
+    int location_id;
+    int min_remaining;
+    uint16_t open_mask;
+    struct sim_state_node* parent;
+    struct sim_state_node* children[MAX_VALVES];
+};
+
 struct sim_state_cache
 {
     sim_state key;
-    int value;
+    struct sim_state_node* value;
 };
 
 struct valve_system
@@ -118,6 +135,9 @@ struct valve_system parse_valve_system(const char* input_string);
 void simplify_valve_system(struct valve_system* valves);
 void free_valve_system(struct valve_system* valves);
 
+void print_adj_matrix(struct valve_system valves, int** override);
+int** copy_adj_matrix(struct valve_system valves);
+
 sim_state pack_sim_state(
     int min_remaining,
     int location_id,
@@ -129,14 +149,87 @@ void unpack_sim_state(
     int* location_id,
     uint16_t* open_mask,
     int* total_pressure);
-
-void print_adj_matrix(struct valve_system valves, int** override);
-int** copy_adj_matrix(struct valve_system valves);
-
 int sim_state_total_pressure(sim_state state);
 int sim_state_is_finished(sim_state state);
+int sim_state_min_remaining(sim_state state);
+int sim_state_location_id(sim_state state);
+uint16_t sim_state_open_mask(sim_state state);
 sim_state sim_n_minutes(struct valve_system* valves, sim_state start_state, int n_minutes);
 sim_state sim_open_valve(struct valve_system* valves, sim_state start_state, int valve_id);
+
+struct sim_state_node*
+build_state_tree(struct valve_system* valves, sim_state state, struct sim_state_node* parent)
+{
+    struct sim_state_node* node = hmget(valves->state_cache, state);
+    if (!node) {
+        node = (struct sim_state_node*)calloc(1, sizeof(struct sim_state_node));
+        node->state = state;
+        node->parent = parent;
+        unpack_sim_state(
+            node->state,
+            &node->min_remaining,
+            &node->location_id,
+            &node->open_mask,
+            &node->total_pressure);
+
+        hmput(valves->state_cache, state, node);
+    }
+
+    if (node->min_remaining > 0) {
+        int found_child = 0;
+        for (int i = 1; i < valves->count; ++i) {
+            if (!TEST(node->open_mask, i)) {
+                int min_to_open = valves->adj_matrix[node->location_id][i] + 1;
+
+                // skip anything we wont be able to open in time
+                if (min_to_open >= node->min_remaining) {
+                    continue;
+                }
+
+                int child_index;
+                for (child_index = 0; child_index < MAX_VALVES; ++child_index)
+                    if (node->children[child_index] == NULL) break;
+                sim_state child_state = sim_open_valve(valves, state, i);
+                node->children[child_index] = build_state_tree(valves, child_state, node);
+                found_child = 1;
+            }
+        }
+        if (!found_child && node->min_remaining > 0) {
+            sim_state final_state = sim_n_minutes(valves, state, node->min_remaining);
+            node->children[0] = build_state_tree(valves, final_state, node);
+        }
+    }
+
+    return node;
+}
+
+sim_state
+find_largest_leaf(struct sim_state_node* root)
+{
+    if (root->children[0] == NULL) {
+        return root->state;
+    }
+
+    sim_state max_state = 0;
+    for (int i = 0; i < MAX_VALVES; ++i) {
+        if (!root->children[i]) break;
+        sim_state child_largest = find_largest_leaf(root->children[i]);
+        if (child_largest > max_state) max_state = child_largest;
+    }
+
+    return max_state;
+}
+
+void
+asdf(struct sim_state_node* root)
+{
+    if (!root) return;
+
+    if (root->min_remaining == 0 && root->total_pressure >= 1900)
+        printf("%d\n", root->total_pressure);
+    for (int i = 0; i < MAX_VALVES; ++i)
+        asdf(root->children[i]);
+}
 
 int
 main(void)
@@ -151,36 +244,45 @@ main(void)
 
     sim_state start_state = pack_sim_state(30, 0, 0, 0);
     sim_state state = start_state;
-    while (!sim_state_is_finished(state)) {
-        unpack_sim_state(state, &min_remaining, &location_id, &opened, &total_pressure);
+    struct sim_state_node* root = build_state_tree(&valves, start_state, NULL);
 
-        printf("== Minute %d == \n", 30 - min_remaining + 1);
-        printf("L: %d, O: 0x%04x, P: %d\n", location_id, opened, total_pressure);
+    asdf(root);
 
-        double best_score = -INFINITY;
-        int best_id = -1;
+    sim_state largest_state = find_largest_leaf(root);
+    struct sim_state_node* largest_node = hmget(valves.state_cache, largest_state);
+    struct sim_state_node* node_path[MAX_VALVES];
+    int node_path_len = 0;
+    struct sim_state_node* slider = largest_node;
+    while (slider) {
+        node_path[node_path_len++] = slider;
+        slider = slider->parent;
+    }
+    int head = 0, tail = node_path_len - 1;
+    while (head < tail) {
+        struct sim_state_node* tmp = node_path[head];
+        node_path[head] = node_path[tail];
+        node_path[tail] = tmp;
+        head++;
+        tail--;
+    }
+    int largest_pressure = sim_state_total_pressure(largest_state);
+    printf("Largest pressure: %d\n", largest_pressure);
 
-        // can always skip 0th valve
-        for (int i = 1; i < valves.count; ++i) {
-            if (!TEST(opened, i)) {
-                const double K = 2.0;
-                int dist = valves.adj_matrix[location_id][i];
-                double score = (double)valves.flows[i] / (dist * K);
-                if (score > best_score) {
-                    best_score = score;
-                    best_id = i;
-                }
+    for (int i = 0; i < node_path_len; ++i) {
+        struct sim_state_node* curr = node_path[i];
+        printf("== Minute %d ==\n", (curr->min_remaining > 0) ? 30 - curr->min_remaining + 1 : 30);
+        int ppm = 0;
+        printf("[ ");
+        for (int j = 0; j < valves.count; ++j) {
+            if (TEST(curr->open_mask, j)) {
+                printf("%s ", valves.names[j].name);
+                ppm += valves.flows[j];
             }
         }
-        if (best_id >= 0) {
-            state = sim_open_valve(&valves, state, best_id);
-            printf("Opened %s\n", valves.names[best_id].name);
-        } else {
-            state = sim_n_minutes(&valves, state, min_remaining);
-        }
+        printf("] %d\n", ppm);
     }
 
-    printf("%d\n", sim_state_total_pressure(state));
+    free_valve_system(&valves);
 
     return 0;
 }
@@ -506,26 +608,40 @@ unpack_sim_state(
     uint16_t* open_mask,
     int* total_pressure)
 {
-    if (min_remaining) *min_remaining = (state >> 16) & 0x1F;
-    if (location_id) *location_id = (state >> 21) & 0xF;
-    if (open_mask) *open_mask = (uint16_t)(state & 0xFFFF);
-    if (total_pressure) *total_pressure = state >> 32;
+    *min_remaining = sim_state_min_remaining(state);
+    *location_id = sim_state_location_id(state);
+    *open_mask = sim_state_open_mask(state);
+    *total_pressure = sim_state_total_pressure(state);
 }
 
 int
 sim_state_total_pressure(sim_state state)
 {
-    int pressure = 0;
-    unpack_sim_state(state, NULL, NULL, NULL, &pressure);
-    return pressure;
+    return state >> 32;
+}
+
+int
+sim_state_location_id(sim_state state)
+{
+    return (state >> 21) & 0xF;
 }
 
 int
 sim_state_is_finished(sim_state state)
 {
-    int rem = 0;
-    unpack_sim_state(state, &rem, NULL, NULL, NULL);
-    return rem == 0;
+    return sim_state_min_remaining(state) == 0;
+}
+
+int
+sim_state_min_remaining(sim_state state)
+{
+    return (state >> 16) & 0x1F;
+}
+
+uint16_t
+sim_state_open_mask(sim_state state)
+{
+    return (uint16_t)(state & 0xFFFF);
 }
 
 sim_state
@@ -567,10 +683,12 @@ sim_open_valve(struct valve_system* valves, sim_state start_state, int valve_id)
     int n_minutes = valves->adj_matrix[location_id][valve_id] + 1;
     sim_state new_state = sim_n_minutes(valves, start_state, n_minutes);
     {
-        int new_min_remaining, new_total_pressure;
-        unpack_sim_state(new_state, &new_min_remaining, NULL, NULL, &new_total_pressure);
         open_mask |= (1 << valve_id);
-        new_state = pack_sim_state(new_min_remaining, valve_id, open_mask, new_total_pressure);
+        new_state = pack_sim_state(
+            sim_state_min_remaining(new_state),
+            valve_id,
+            open_mask,
+            sim_state_total_pressure(new_state));
     }
     return new_state;
 }

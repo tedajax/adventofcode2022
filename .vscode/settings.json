@@ -58,6 +58,7 @@
 		"stdexcept": "cpp",
 		"streambuf": "cpp",
 		"typeinfo": "cpp",
-		"sokol_time.h": "c"
+		"sokol_time.h": "c",
+		"xxhash.h": "c"
 	}
 }
